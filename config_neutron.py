@@ -4,7 +4,7 @@ import deploy
 
 RABBIT_PASS= '123456'
 METADATA_SECRET = '123456'
-PROVIDER_INTERFACE_NAME = 'eth0'
+PROVIDER_INTERFACE_NAME = 'eth1'
 
 config_2_neutron = \
     {
@@ -94,9 +94,6 @@ config_2_ml2_conf = \
      "ml2_type_flat":{
         "flat_networks": "provider"
         },
-     "ml2_type_vxlan":{
-        "vni_ranges": ""
-        },
      "securitygroup":{
         "enable_ipset": "True"
         }
@@ -106,16 +103,16 @@ config_3_ml2_conf = \
     {
      "filename":"/etc/neutron/plugins/ml2/ml2_conf.ini",
      "ml2":{
-        "type_drivers": "flat,vlan,vxlan",
-        "tenant_network_types": "vxlan",
+        "type_drivers": "flat,vlan",
+        "tenant_network_types": "vlan",
         "mechanism_drivers": "linuxbridge,l2population",
         "extension_drivers": "port_security"
         },
      "ml2_type_flat":{
-        "flat_networks": "provider"
+        "flat_networks": "provider01,provider02"
         },
-     "ml2_type_vxlan":{
-        "vni_ranges": "1:1000"
+     "ml2_type_vlan":{
+        "network_vlan_ranges": "provider02:101:200"
         },
      "securitygroup":{
         "enable_ipset": "True"
@@ -129,9 +126,7 @@ config_2_linuxbridge_agent = \
         "physical_interface_mappings": "provider:%s" % PROVIDER_INTERFACE_NAME
         },
      "vxlan":{
-        "enable_vxlan": "False",
-        "local_ip": "<None>",
-        "l2_population": "False",
+        "enable_vxlan": "False"
         },
      "securitygroup":{
         "enable_security_group": "True",
@@ -144,12 +139,10 @@ config_3_linuxbridge_agent = \
     {
      "filename":"/etc/neutron/plugins/ml2/linuxbridge_agent.ini",
      "linux_bridge":{
-        "physical_interface_mappings": "provider:%s" % PROVIDER_INTERFACE_NAME
+        "physical_interface_mappings": "provider01:%s,provider02:%s" % (PROVIDER_INTERFACE_NAME,PROVIDER_INTERFACE_NAME)
         },
      "vxlan":{
-        "enable_vxlan": "True",
-        "local_ip": "",
-        "l2_population": "True",
+        "enable_vxlan": "False"
         },
      "securitygroup":{
         "enable_security_group": "True",
