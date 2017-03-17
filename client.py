@@ -1,6 +1,7 @@
 
 import json
 import urllib2
+import config
 
 class Opthttp(object):
     def __init__(self, passwd):
