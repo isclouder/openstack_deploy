@@ -1,6 +1,7 @@
 
 import os
 import commands
+import config
 
 dbopt = {
          "keystone":  [{"sysuser": "keystone",  "dbname": "keystone",  "dbpasswd": config.KEYSTONE_DBPASS,  "dbsync": "keystone-manage db_sync"}],

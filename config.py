@@ -27,10 +27,10 @@ config_2_neutron = \
     {
      "filename":"/etc/neutron/neutron.conf",
      "database":{
-        "connection": "mysql+pymysql://neutron:%s@%s/neutron" %(deploy.NEUTRON_DBPASS, deploy.CONTROLLER_HOSTNAME)
+        "connection": "mysql+pymysql://neutron:%s@%s/neutron" %(NEUTRON_DBPASS, CONTROLLER_HOSTNAME)
         },
      "DEFAULT":{
-        "transport_url": "rabbit://openstack:%s@%s" % (RABBIT_PASS, deploy.CONTROLLER_HOSTNAME),
+        "transport_url": "rabbit://openstack:%s@%s" % (RABBIT_PASS, CONTROLLER_HOSTNAME),
         "auth_strategy": "keystone",
         "core_plugin": "ml2",
         "service_plugins": "",
@@ -39,25 +39,25 @@ config_2_neutron = \
         "notify_nova_on_port_data_changes": "True"
         },
      "keystone_authtoken":{
-        "auth_uri": "http://%s:5000" % deploy.CONTROLLER_HOSTNAME,
-        "auth_url": "http://%s:35357" % deploy.CONTROLLER_HOSTNAME,
-        "memcached_servers": "%s:11211" % deploy.CONTROLLER_HOSTNAME,
+        "auth_uri": "http://%s:5000" % CONTROLLER_HOSTNAME,
+        "auth_url": "http://%s:35357" % CONTROLLER_HOSTNAME,
+        "memcached_servers": "%s:11211" % CONTROLLER_HOSTNAME,
         "auth_type": "password",
         "project_domain_name": "Default",
         "user_domain_name": "Default",
         "project_name": "service",
         "username": "neutron",
-        "password": deploy.NEUTRON_PASS
+        "password": NEUTRON_PASS
         },
      "nova":{
-        "auth_url": "http://%s:35357" % deploy.CONTROLLER_HOSTNAME,
+        "auth_url": "http://%s:35357" % CONTROLLER_HOSTNAME,
         "auth_type": "password",
         "project_domain_name": "Default",
         "user_domain_name": "Default",
         "region_name": "RegionOne",
         "project_name": "service",
         "username": "nova",
-        "password": deploy.NOVA_PASS
+        "password": NOVA_PASS
         }
      }
 
@@ -65,10 +65,10 @@ config_3_neutron = \
     {
      "filename":"/etc/neutron/neutron.conf",
      "database":{
-        "connection": "mysql+pymysql://neutron:%s@%s/neutron" %(deploy.NEUTRON_DBPASS, deploy.CONTROLLER_HOSTNAME)
+        "connection": "mysql+pymysql://neutron:%s@%s/neutron" %(NEUTRON_DBPASS, CONTROLLER_HOSTNAME)
         },
      "DEFAULT":{
-        "transport_url": "rabbit://openstack:%s@%s" % (RABBIT_PASS, deploy.CONTROLLER_HOSTNAME),
+        "transport_url": "rabbit://openstack:%s@%s" % (RABBIT_PASS, CONTROLLER_HOSTNAME),
         "auth_strategy": "keystone",
         "core_plugin": "ml2",
         "service_plugins": "router",
@@ -77,25 +77,25 @@ config_3_neutron = \
         "notify_nova_on_port_data_changes": "True"
         },
      "keystone_authtoken":{
-        "auth_uri": "http://%s:5000" % deploy.CONTROLLER_HOSTNAME,
-        "auth_url": "http://%s:35357" % deploy.CONTROLLER_HOSTNAME,
-        "memcached_servers": "%s:11211" % deploy.CONTROLLER_HOSTNAME,
+        "auth_uri": "http://%s:5000" % CONTROLLER_HOSTNAME,
+        "auth_url": "http://%s:35357" % CONTROLLER_HOSTNAME,
+        "memcached_servers": "%s:11211" % CONTROLLER_HOSTNAME,
         "auth_type": "password",
         "project_domain_name": "Default",
         "user_domain_name": "Default",
         "project_name": "service",
         "username": "neutron",
-        "password": deploy.NEUTRON_PASS
+        "password": NEUTRON_PASS
         },
      "nova":{
-        "auth_url": "http://%s:35357" % deploy.CONTROLLER_HOSTNAME,
+        "auth_url": "http://%s:35357" % CONTROLLER_HOSTNAME,
         "auth_type": "password",
         "project_domain_name": "Default",
         "user_domain_name": "Default",
         "region_name": "RegionOne",
         "project_name": "service",
         "username": "nova",
-        "password": deploy.NOVA_PASS
+        "password": NOVA_PASS
         }
      }
 
@@ -183,7 +183,7 @@ config_23_metadata_agent = \
     {
      "filename":"/etc/neutron/metadata_agent.ini",
      "DEFAULT":{
-        "nova_metadata_ip": deploy.CONTROLLER_HOSTNAME,
+        "nova_metadata_ip": CONTROLLER_HOSTNAME,
         "metadata_proxy_shared_secret": METADATA_SECRET
         }
     }
