@@ -72,9 +72,27 @@ class Neutron(object):
         ret = self.http.http_post(url, body)
         return ret
 
+    def router_delete(self, id):
+        url = '%s/routers/%s.json' %(self.baseurl, id)
+        body = None
+        ret = self.http.http_delete(url, body)
+        return ret
+
+    def router_gateway_set(self, id, extnet_id):
+        url = '%s/routers/%s.json' %(self.baseurl, id)
+        body = {'router': {'external_gateway_info': {'network_id': extnet_id}}}
+        ret = self.http.http_put(url, body)
+        return ret
+
     def router_gateway_clear(self, id):
         url = '%s/routers/%s.json' %(self.baseurl, id)
         body = {'router': {'external_gateway_info': {}}}
+        ret = self.http.http_put(url, body)
+        return ret
+
+    def router_interface_add(self, id, subnet_id):
+        url = '%s/routers/%s/add_router_interface.json' %(self.baseurl, id)
+        body = {'subnet_id': subnet_id}
         ret = self.http.http_put(url, body)
         return ret
 
@@ -84,10 +102,5 @@ class Neutron(object):
         ret = self.http.http_put(url, body)
         return ret
 
-    def router_delete(self, id):
-        url = '%s/routers/%s.json' %(self.baseurl, id)
-        body = None
-        ret = self.http.http_delete(url, body)
-        return ret
 
 
