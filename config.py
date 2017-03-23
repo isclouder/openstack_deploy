@@ -1,7 +1,6 @@
 
 import utils
 import os
-import deploy
 
 CONTROLLER_HOSTNAME='controller'
 PROVIDER_INTERFACE_NAME = 'eth1'

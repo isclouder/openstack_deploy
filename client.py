@@ -10,7 +10,7 @@ class Opthttp(object):
         self.token, self.tenant = self.__get_token(passwd)
 
     def __get_token(self, passwd):
-        url = 'http://127.0.0.1:5000/v2.0/tokens'
+        url = 'http://%s:5000/v2.0/tokens' % CONTROLLER_HOSTNAME
         values = {"auth": {"tenantName": "admin", "passwordCredentials": {"username": "admin", "password": passwd}}}
         data = self.http_post(url, values)
         token = data['access']['token']['id']
@@ -53,13 +53,23 @@ class Opthttp(object):
 
 class Neutron(object):
     def __init__(self):
-        self.baseurl = 'http://cvm:9696/v2.0'
+        self.baseurl = 'http://%s:9696/v2.0' % CONTROLLER_HOSTNAME
         self.http = Opthttp(config.ADMIN_PASS)
+
+    def find_resource_id_by_name(self, resource, name):
+        url = '%s/%s.json?fields=id&name=%s' %(self.baseurl, resource, name)
+        id = self.http.http_get(url)
+        return id
 
     def router_list(self):
         url = '%s/routers.json' %(self.baseurl)
         list = self.http.http_get(url)
         return list
+
+    def router_show(self, id):
+        url = '%s/routers/%s.json' %(self.baseurl, id)
+        info = self.http.http_get(url)
+        return info
 
     def router_port_list(self, id):
         url = '%s/ports.json?device_id=%s' %(self.baseurl, id)
