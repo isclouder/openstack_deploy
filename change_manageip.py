@@ -1,5 +1,4 @@
 import ConfigParser
-import utils
 
 def change_manage_ip(address):
     cfile = "/etc/nova/nova.conf"
@@ -49,6 +48,6 @@ def change_manage_ip(address):
     file2.close()
 
     file = open("/etc/chrony/chrony.conf", "a")
-    file.writelines('allow %s.0.0.0/24\n' % utils.get_subnet(address))
+    file.writelines('allow 0.0.0.0/24\n')
     file.close()
 

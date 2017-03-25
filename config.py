@@ -1,5 +1,5 @@
 
-import utils
+from openstack_deploy.utils import utils
 import os
 
 CONTROLLER_HOSTNAME='controller'
