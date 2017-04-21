@@ -1,7 +1,7 @@
 
 import os
 import commands
-from openstack_deploy.common. import common
+from openstack_deploy.configs import common
 
 dbopt = {
          "keystone":  [{"sysuser": "keystone",  "dbname": "keystone",  "dbpasswd": common.KEYSTONE_DBPASS,  "dbsync": "keystone-manage db_sync"}],
