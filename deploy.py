@@ -1,36 +1,36 @@
 
 import os
 import commands
-import config
+from openstack_deploy.common. import common
 
 dbopt = {
-         "keystone":  [{"sysuser": "keystone",  "dbname": "keystone",  "dbpasswd": config.KEYSTONE_DBPASS,  "dbsync": "keystone-manage db_sync"}],
-         "glance":    [{"sysuser": "glance",    "dbname": "glance",    "dbpasswd": config.GLANCE_DBPASS,    "dbsync": "glance-manage db_sync"}],
+         "keystone":  [{"sysuser": "keystone",  "dbname": "keystone",  "dbpasswd": common.KEYSTONE_DBPASS,  "dbsync": "keystone-manage db_sync"}],
+         "glance":    [{"sysuser": "glance",    "dbname": "glance",    "dbpasswd": common.GLANCE_DBPASS,    "dbsync": "glance-manage db_sync"}],
          "nova":      [
-                       {"sysuser": "nova",      "dbname": "nova_api",  "dbpasswd": config.NOVAAPI_DBPASS,   "dbsync": "nova-manage api_db sync"},
-                       {"sysuser": "nova",      "dbname": "nova",      "dbpasswd": config.NOVA_DBPASS,      "dbsync": "nova-manage db sync"}
+                       {"sysuser": "nova",      "dbname": "nova_api",  "dbpasswd": common.NOVAAPI_DBPASS,   "dbsync": "nova-manage api_db sync"},
+                       {"sysuser": "nova",      "dbname": "nova",      "dbpasswd": common.NOVA_DBPASS,      "dbsync": "nova-manage db sync"}
                       ],
-         "neutron":   [{"sysuser": "neutron",   "dbname": "neutron",   "dbpasswd": config.NEUTRON_DBPASS,   "dbsync": "neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head"}],
-         "cinder":    [{"sysuser": "cinder",    "dbname": "cinder",    "dbpasswd": config.CINDER_DBPASS,    "dbsync": "cinder-manage db sync"}]
+         "neutron":   [{"sysuser": "neutron",   "dbname": "neutron",   "dbpasswd": common.NEUTRON_DBPASS,   "dbsync": "neutron-db-manage --common.file /etc/neutron/neutron.conf --common.file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head"}],
+         "cinder":    [{"sysuser": "cinder",    "dbname": "cinder",    "dbpasswd": common.CINDER_DBPASS,    "dbsync": "cinder-manage db sync"}]
         }
 
 serviceopt ={
-              "glance": [{"name":"glance",   "type":"image",    "description":"OpenStack Image",         "http":"http://%s:9292" % config.CONTROLLER_HOSTNAME}],
-              "nova":   [{"name":"nova",     "type":"compute",  "description":"OpenStack Compute",       "http":"http://%s:8774/v2.1/%%\(tenant_id\)s" % config.CONTROLLER_HOSTNAME}],
-              "neutron":[{"name":"neutron",  "type":"network",  "description":"OpenStack Networking",    "http":"http://%s:9696" % config.CONTROLLER_HOSTNAME}],
+              "glance": [{"name":"glance",   "type":"image",    "description":"OpenStack Image",         "http":"http://%s:9292" % common.CONTROLLER_HOSTNAME}],
+              "nova":   [{"name":"nova",     "type":"compute",  "description":"OpenStack Compute",       "http":"http://%s:8774/v2.1/%%\(tenant_id\)s" % common.CONTROLLER_HOSTNAME}],
+              "neutron":[{"name":"neutron",  "type":"network",  "description":"OpenStack Networking",    "http":"http://%s:9696" % common.CONTROLLER_HOSTNAME}],
               "cinder": [
-                         {"name":"cinder",   "type":"volume",   "description":"OpenStack Block Storage", "http":"http://%s:8776/v1/%%\(tenant_id\)s" % config.CONTROLLER_HOSTNAME},
-                         {"name":"cinderv2", "type":"volumev2", "description":"OpenStack Block Storage", "http":"http://%s:8776/v2/%%\(tenant_id\)s" % config.CONTROLLER_HOSTNAME}
+                         {"name":"cinder",   "type":"volume",   "description":"OpenStack Block Storage", "http":"http://%s:8776/v1/%%\(tenant_id\)s" % common.CONTROLLER_HOSTNAME},
+                         {"name":"cinderv2", "type":"volumev2", "description":"OpenStack Block Storage", "http":"http://%s:8776/v2/%%\(tenant_id\)s" % common.CONTROLLER_HOSTNAME}
                         ]
              }
 
 admin_env ={
              "OS_USERNAME": "admin",
-             "OS_PASSWORD": config.ADMIN_PASS,
+             "OS_PASSWORD": common.ADMIN_PASS,
              "OS_PROJECT_NAME": "admin",
              "OS_USER_DOMAIN_NAME": "Default",
              "OS_PROJECT_DOMAIN_NAME": "Default",
-             "OS_AUTH_URL": "http://%s:35357/v3" % config.CONTROLLER_HOSTNAME,
+             "OS_AUTH_URL": "http://%s:35357/v3" % common.CONTROLLER_HOSTNAME,
              "OS_IDENTITY_API_VERSION": "3",
              "OS_IMAGE_API_VERSION": "2"
            }
@@ -45,7 +45,7 @@ def create_db(dbs):
     for db in dbs:
         try:
             sql = "DROP DATABASE %s; " % db['dbname']
-            cmd = "mysql -uroot -p%s -e \"%s\"" % (config.MYSQL_PASS, sql)
+            cmd = "mysql -uroot -p%s -e \"%s\"" % (common.MYSQL_PASS, sql)
             exec_cmd(cmd)
         except Exception as e:
             pass
@@ -53,7 +53,7 @@ def create_db(dbs):
         sql = "CREATE DATABASE %s; " % db['dbname'] + \
               "GRANT ALL PRIVILEGES ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s'; " % (db['dbname'], db['sysuser'], db['dbpasswd']) + \
               "GRANT ALL PRIVILEGES ON %s.* TO '%s'@'%%' IDENTIFIED BY '%s'" % (db['dbname'], db['sysuser'], db['dbpasswd'])
-        cmd = "mysql -uroot -p%s -e \"%s\"" % (config.MYSQL_PASS, sql)
+        cmd = "mysql -uroot -p%s -e \"%s\"" % (common.MYSQL_PASS, sql)
         exec_cmd(cmd)
 
         cmd = "su -s /bin/sh -c \"%s\" %s" % (db['dbsync'], db['sysuser'])
@@ -63,10 +63,10 @@ def create_db(dbs):
 def keystone_init():
     cmd = "keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone; " + \
           "keystone-manage credential_setup --keystone-user keystone --keystone-group keystone; " + \
-          "keystone-manage bootstrap --bootstrap-password %s " % config.ADMIN_PASS + \
-          "--bootstrap-admin-url http://%s:35357/v3/ " % config.CONTROLLER_HOSTNAME + \
-          "--bootstrap-internal-url http://%s:35357/v3/ " % config.CONTROLLER_HOSTNAME + \
-          "--bootstrap-public-url http://%s:5000/v3/ " % config.CONTROLLER_HOSTNAME + \
+          "keystone-manage bootstrap --bootstrap-password %s " % common.ADMIN_PASS + \
+          "--bootstrap-admin-url http://%s:35357/v3/ " % common.CONTROLLER_HOSTNAME + \
+          "--bootstrap-internal-url http://%s:35357/v3/ " % common.CONTROLLER_HOSTNAME + \
+          "--bootstrap-public-url http://%s:5000/v3/ " % common.CONTROLLER_HOSTNAME + \
           "--bootstrap-region-id RegionOne"
     exec_cmd(cmd)
 
@@ -104,10 +104,10 @@ def deploy(name):
         keystone_init()
         os.environ.update(admin_env)
         create_project_service()
-        create_user_and_service('glance', config.GLANCE_PASS)
-        create_user_and_service('nova', config.NOVA_PASS)
-        create_user_and_service('neutron', config.NEUTRON_PASS)
-        create_user_and_service('cinder', config.CINDER_PASS)
+        create_user_and_service('glance', common.GLANCE_PASS)
+        create_user_and_service('nova', common.NOVA_PASS)
+        create_user_and_service('neutron', common.NEUTRON_PASS)
+        create_user_and_service('cinder', common.CINDER_PASS)
 
     os.environ.update(admin_env)
     if name == 'all' or name == 'glance':
