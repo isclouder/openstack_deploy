@@ -11,6 +11,8 @@ class Config(object):
 
     def set(self, contents):
         for section, options in contents.items():
+            if section != "DEFAULT" and not self.parser.has_section(section):
+                self.parser.add_section(section)
             for option, value in options.items():
                 self.parser.set(section, option, value)
 
