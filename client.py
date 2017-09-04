@@ -4,14 +4,16 @@ import urllib2
 import config
 
 class Opthttp(object):
-    def __init__(self, passwd):
+    def __init__(self, controller=None, username=None, passwd=None, timeout=None):
         self.token = None
         self.tenant = None
-        self.token, self.tenant = self.__get_token(passwd)
+        self.timeout = timeout
+        if username and passwd:
+            self.token, self.tenant = self.__get_token(controller, username, passwd)
 
-    def __get_token(self, passwd):
-        url = 'http://%s:5000/v2.0/tokens' % CONTROLLER_HOSTNAME
-        values = {"auth": {"tenantName": "admin", "passwordCredentials": {"username": "admin", "password": passwd}}}
+    def __get_token(self, controller, username, passwd):
+        url = 'http://%s:5000/v2.0/tokens' %controller
+        values = {"auth": {"tenantName": "admin", "passwordCredentials": {"username": username, "password": passwd}}}
         data = self.http_post(url, values)
         token = data['access']['token']['id']
         tenant = data['access']['token']['tenant']['id']
@@ -19,9 +21,14 @@ class Opthttp(object):
 
     def http_get(self, url):
         req = urllib2.Request(url)
-        req.add_header('X-Auth-Token', self.token)
-        response = urllib2.urlopen(req)
+        if self.token:
+            req.add_header('X-Auth-Token', self.token)
+        if self.timeout:
+            response = urllib2.urlopen(req, timeout=self.timeout)
+        else:
+            response = urllib2.urlopen(req)
         data = response.read()
+        response.close()
         data = json.loads(data)
         return data
 
@@ -36,8 +43,12 @@ class Opthttp(object):
         if self.token:
             req.add_header('X-Auth-Token', self.token)
         req.get_method = lambda: method
-        response = urllib2.urlopen(req)
+        if self.timeout:
+            response = urllib2.urlopen(req, timeout=self.timeout)
+        else:
+            response = urllib2.urlopen(req)
         data = response.read()
+        response.close()
         if data != '':
             data = json.loads(data)
         return data
@@ -52,9 +63,9 @@ class Opthttp(object):
         return self._do_http_post('DELETE', url, body)
 
 class Neutron(object):
-    def __init__(self):
-        self.baseurl = 'http://%s:9696/v2.0' % CONTROLLER_HOSTNAME
-        self.http = Opthttp(config.ADMIN_PASS)
+    def __init__(self, controller=None, username=None, passwd=None):
+        self.baseurl = 'http://%s:9696/v2.0' %controller
+        self.http = Opthttp(controller, username, passwd, timeout=5)
 
     def find_resource_id_by_name(self, resource, name):
         url = '%s/%s.json?fields=id&name=%s' %(self.baseurl, resource, name)
@@ -88,9 +99,9 @@ class Neutron(object):
         ret = self.http.http_delete(url, body)
         return ret
 
-    def router_gateway_set(self, id, extnet_id):
+    def router_gateway_set(self, id, extnet_info):
         url = '%s/routers/%s.json' %(self.baseurl, id)
-        body = {'router': {'external_gateway_info': {'network_id': extnet_id}}}
+        body = {'router': {'external_gateway_info': extnet_info}}
         ret = self.http.http_put(url, body)
         return ret
 
@@ -112,5 +123,30 @@ class Neutron(object):
         ret = self.http.http_put(url, body)
         return ret
 
+    def port_list(self):
+        url = '%s/ports.json' %(self.baseurl)
+        list = self.http.http_get(url)
+        return list
 
+    def port_show(self, id):
+        url = '%s/ports/%s.json' %(self.baseurl, id)
+        info = self.http.http_get(url)
+        return info
+
+    def port_delete(self, id):
+        url = '%s/ports/%s.json' %(self.baseurl, id)
+        body = None
+        ret = self.http.http_delete(url, body)
+        return ret
+
+    def agent_list(self):
+        url = '%s/agents.json' %(self.baseurl)
+        list = self.http.http_get(url)
+        return list
+
+    def agent_delete(self, id):
+        url = '%s/agents/%s.json' %(self.baseurl, id)
+        body = None
+        ret = self.http.http_delete(url, body)
+        return ret
 
